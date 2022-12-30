@@ -1,3 +1,4 @@
+<script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
 <?php
 require('connection.php');
 require('functions.php');
@@ -6,9 +7,47 @@ $branchid = 1;
 $flag = $prodid = $employeeid = $stockinhand = $finishedqty = $uom_head = $remarks = '';
 $predate = date('Y-m-d');
 
+if (isset($_GET['flag']) && isset($_GET['prehid']) && $_GET['flag'] == 'U') {
+
+    //$prehid = $_POST['prehid'];
+    $response_array = getPreproductionDetailAgainstId($con, 1);
+    ?>
+    <script>
+        $(document).ready(function () {
+            var response_array = '<?= $response_array ?>';
+            response_array = JSON.parse(response_array);
+
+            var prodid_array = response_array['detail_prodid'];
+            var price_array = response_array['detail_price'];
+            var stockinhand_array = response_array['detail_stockinhand'];
+            var qty_array = response_array['detail_qty'];
+            var uom_array = response_array['detail_uom'];
+
+            for (var i = 0; i < prodid_array.length; i++) {
+                var prodid = prodid_array[i];
+                var price = price_array[i];
+                var stockinhand = stockinhand_array[i];
+                var qty = qty_array[i];
+                var uom = uom_array[i];
+
+                $('#prodname').val(prodid);
+                $('#uom').val(uom);
+                $('#price').val(price);
+                $('#stock_in_hand').val(stockinhand);
+                $('#qty').val(qty);
+                $('#amount').val(qty * price);
+
+                document.getElementById('add').click();
+
+            }
+
+        })
+
+    </script>
+<?php }
 ?>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+
 <script src="function.js"></script>
 <div class="container mt-2 mb-1" style="border: 1px solid green" id="page-container">
     <form method="post" action="save.php">
@@ -258,6 +297,7 @@ $predate = date('Y-m-d');
     }
 
     function AddItemInTable() {
+        console.log('called')
         //    GETTING VALUES FROM INPUT FIELDS
         var prodid = $('#prodname').val();
         var uom = $('#uom').val();
@@ -338,7 +378,7 @@ $predate = date('Y-m-d');
     function del_row(r) {
         var i = r.parentNode.parentNode.rowIndex;
         var table = document.getElementById("detailTbl");
-        var totalRowCount = table.rows.length - 1;
+        var totalRowCount = table.rows.length;
         if (totalRowCount > 1) {
             document.getElementById("detailTbl").deleteRow(i);
         }
