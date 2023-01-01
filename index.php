@@ -4,21 +4,19 @@
 <?php
 require ('connection.php');
 require ('functions.php');
-
 $branchid = 1;
 $flag = $prodid = $prehid = $employeeid = $stockinhand_head = $finishedqty = $uom_head = $remarks = '';
 $predate = date ('Y-m-d');
 if (isset($_GET['prehid'])) {
     $flag = 'U';
     $prehid = $_GET['prehid'];
-    $preproduction_head_info= getPreproductionHeadItem($con,$prehid);
-    $employeeid=$preproduction_head_info['employeeid'];
-    $finishedqty=$preproduction_head_info['finishedqty'];
-    $uom_head=$preproduction_head_info['uom'];
-    $stockinhand_head=$preproduction_head_info['stockinhand'];
-    $prodid=$preproduction_head_info['prodid'];
-    $remarks=$preproduction_head_info['remarks'];
-
+    $preproduction_head_info = getPreproductionHeadItem ($con, $prehid);
+    $employeeid = $preproduction_head_info['employeeid'];
+    $finishedqty = $preproduction_head_info['finishedqty'];
+    $uom_head = $preproduction_head_info['uom'];
+    $stockinhand_head = $preproduction_head_info['stockinhand'];
+    $prodid = $preproduction_head_info['prodid'];
+    $remarks = $preproduction_head_info['remarks'];
     $response_array = getPreproductionDetailAgainstId ($con, 1);
     ?>
     <script>
@@ -56,6 +54,11 @@ if (isset($_GET['prehid'])) {
 <?php }
 ?>
 <div class="container mt-2 mb-1" style="border: 1px solid green" id="page-container">
+    <div class="row">
+        <div class="col-md-12">
+            <a href="manage-preproduction.php" style="font-size: 18px;font-weight: bold" class="btn btn-primary"> Manage Preproduction</a>
+        </div>
+    </div>
     <form method="post" action="save.php">
         <div class="row">
             <!-- DROP DOWN FOR PRODUCT NAME -->

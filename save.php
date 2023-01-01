@@ -32,7 +32,6 @@ if (isset($_POST['submit']) && !empty($_POST)) {
         $finished_qty = calculateStockUomWise ($con, $uom_head, $finished_qty);
 //        UPDATING PRE PRODUCTION ITEM IN STOCK
         mysqli_query ($con, "update tblproduct set stockinhand = stockinhand + $finished_qty where prodid=$finished_prodname");
-
         insertPreProductionDetailAndUpdateStockAlso ($con, $detail_prodid, $detail_price, $detail_stockinhand, $detail_qty, $detail_amount, $detail_uom, $last_pre_production_id);
 
     } else {
@@ -49,6 +48,7 @@ if (isset($_POST['submit']) && !empty($_POST)) {
         insertPreProductionDetailAndUpdateStockAlso ($con, $detail_prodid, $detail_price, $detail_stockinhand, $detail_qty, $detail_amount, $detail_uom, $prehid);
 
     }
-
+    echo "<script>alert('Action Performed Successfully')</script>";
+    echo "<script>window.location.href='manage-preproduction.php'</script>";
 }
 ?>

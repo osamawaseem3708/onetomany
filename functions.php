@@ -125,6 +125,7 @@ function reversingPreProductionItemInStockAgainstPreproduction($con, $prehid)
         $prodid = $row['prodid'];
         mysqli_query ($con, "UPDATE `tblproduct` SET `stockinhand`=stockinhand+$old_stock,`lastmoddate`='$lastmoddate',`lastmoduser`='$lastmoduser' WHERE prodid='$prodid'");
     }
+    mysqli_query ($con, "Delete FROM `tblpreproductiondetail` where prehid= '$prehid'");
 }
 
 ?>
