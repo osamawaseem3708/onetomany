@@ -1,16 +1,25 @@
 <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
 <?php
-require('connection.php');
-require('functions.php');
+require ('connection.php');
+require ('functions.php');
 
 $branchid = 1;
-$flag = $prodid = $employeeid = $stockinhand = $finishedqty = $uom_head = $remarks = '';
-$predate = date('Y-m-d');
+$flag = $prodid = $prehid = $employeeid = $stockinhand_head = $finishedqty = $uom_head = $remarks = '';
+$predate = date ('Y-m-d');
+if (isset($_GET['prehid'])) {
+    $flag = 'U';
+    $prehid = $_GET['prehid'];
+    $preproduction_head_info= getPreproductionHeadItem($con,$prehid);
+    $employeeid=$preproduction_head_info['employeeid'];
+    $finishedqty=$preproduction_head_info['finishedqty'];
+    $uom_head=$preproduction_head_info['uom'];
+    $stockinhand_head=$preproduction_head_info['stockinhand'];
+    $prodid=$preproduction_head_info['prodid'];
+    $remarks=$preproduction_head_info['remarks'];
 
-if (isset($_GET['flag']) && isset($_GET['prehid']) && $_GET['flag'] == 'U') {
-
-    //$prehid = $_POST['prehid'];
-    $response_array = getPreproductionDetailAgainstId($con, 1);
+    $response_array = getPreproductionDetailAgainstId ($con, 1);
     ?>
     <script>
         $(document).ready(function () {
@@ -46,9 +55,6 @@ if (isset($_GET['flag']) && isset($_GET['prehid']) && $_GET['flag'] == 'U') {
     </script>
 <?php }
 ?>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-
-<script src="function.js"></script>
 <div class="container mt-2 mb-1" style="border: 1px solid green" id="page-container">
     <form method="post" action="save.php">
         <div class="row">
@@ -57,14 +63,14 @@ if (isset($_GET['flag']) && isset($_GET['prehid']) && $_GET['flag'] == 'U') {
                 <label for="validationCustom03">Product Name <span style="color: red">*</span></label>
                 <select required class="form-control select2" data-select2-id="finished_prodname"
                         name="finished_prodname"
-                        id="finished_prodname" <?php if ($flag == 'U') echo "disabled"; ?>
+                        id="finished_prodname" <?php if ($flag == 'U') echo "readonly"; ?>
                         onchange="getProductInfo(this)">
                     <option value="">Choose</option>
-                    <?php $product = mysqli_query($con, "SELECT * FROM `tblproduct` p join tblproductcategory c on c.prodtype=p.prodtype where p.branchid='$branchid' and c.production='Y' ORDER BY `prodid` DESC");
-                    while ($row = mysqli_fetch_assoc($product)) { ?>
+                    <?php $product = mysqli_query ($con, "SELECT * FROM `tblproduct` p join tblproductcategory c on c.prodtype=p.prodtype where p.branchid='$branchid' and c.production='Y' ORDER BY `prodid` DESC");
+                    while ($row = mysqli_fetch_assoc ($product)) { ?>
                         <option value="<?php echo $row['prodid']; ?>" <?php if ($row['prodid'] == $prodid) {
                             echo "selected=selected";
-                        } ?>><?php echo htmlentities($row['prodname'], ENT_COMPAT, 'UTF-8'); ?></option>
+                        } ?>><?php echo htmlentities ($row['prodname'], ENT_COMPAT, 'UTF-8'); ?></option>
                     <?php } ?>
 
                 </select>
@@ -87,11 +93,11 @@ if (isset($_GET['flag']) && isset($_GET['prehid']) && $_GET['flag'] == 'U') {
                 <select class="form-control select2" name="employeeid" required
                         data-select2-id="employee" id="employeeid">
                     <option value="">Choose</option>
-                    <?php $employee = mysqli_query($con, "SELECT * FROM `tblemployee` where company_id ='$branchid'");
-                    while ($row = mysqli_fetch_assoc($employee)) { ?>
+                    <?php $employee = mysqli_query ($con, "SELECT * FROM `tblemployee` where company_id ='$branchid'");
+                    while ($row = mysqli_fetch_assoc ($employee)) { ?>
                         <option value="<?php echo $row['eid']; ?>" <?php if ($row['eid'] == $employeeid) {
                             echo "selected=selected";
-                        } ?>><?php echo htmlentities($row['fname'] . " " . $row['lname'], ENT_COMPAT, 'UTF-8'); ?></option>
+                        } ?>><?php echo htmlentities ($row['fname'] . " " . $row['lname'], ENT_COMPAT, 'UTF-8'); ?></option>
                     <?php } ?>
                 </select>
                 <div class="invalid-feedback">Please provide a valid Employee name.</div>
@@ -101,7 +107,7 @@ if (isset($_GET['flag']) && isset($_GET['prehid']) && $_GET['flag'] == 'U') {
             <div class="col-md-2 mb-10">
                 <label for="validationCustom03">Stock In Hand</label>
                 <input type="number" id="stockinhand_head" readonly class="form-control"
-                       placeholder="10" name="stockinhand_head" value="<?php echo $stockinhand; ?>"
+                       placeholder="10" name="stockinhand_head" value="<?php echo $stockinhand_head; ?>"
                        step="any" required>
                 <div class="invalid-feedback">Please provide a valid Purchase Date.</div>
             </div>
@@ -121,8 +127,8 @@ if (isset($_GET['flag']) && isset($_GET['prehid']) && $_GET['flag'] == 'U') {
                         name="uom_head">
                     <option value="">Select UOM</option>
                     <?php
-                    $q = mysqli_query($con, "select * from tbluom");
-                    while ($row = mysqli_fetch_assoc($q)) { ?>
+                    $q = mysqli_query ($con, "select * from tbluom");
+                    while ($row = mysqli_fetch_assoc ($q)) { ?>
                         <option value="<?php echo $row['longname'] ?>" <?php if ($uom_head == $row['longname']) echo "selected=selected"; ?>>
                             <?php echo $row['longname']; ?>
                         </option>
@@ -138,6 +144,8 @@ if (isset($_GET['flag']) && isset($_GET['prehid']) && $_GET['flag'] == 'U') {
                        name="remarks" id="remarks" value="<?php echo $remarks; ?>">
                 <div class="invalid-feedback">Please provide a valid Remarks.</div>
             </div>
+            <input type="hidden" value="<?php echo $flag; ?>" name="flag" id="flag">
+            <input type="hidden" value="<?php echo $prehid; ?>" name="prehid" id="prehid">
         </div>
 
         <div class="container mt-3" style="border: 1px solid black" id="main-detail-container">
@@ -152,7 +160,7 @@ if (isset($_GET['flag']) && isset($_GET['prehid']) && $_GET['flag'] == 'U') {
                     <label for="prodname">Product Name</label>
                     <select id="prodname" class="form-control custom-select" name="prodname"
                             onchange="getProductInfo(this,'DH')">
-                        <?= getProductDropDownOptions($con); ?>
+                        <?= getProductDropDownOptions ($con); ?>
                     </select>
                 </div>
 
@@ -174,7 +182,7 @@ if (isset($_GET['flag']) && isset($_GET['prehid']) && $_GET['flag'] == 'U') {
                 <div class="col-md-2">
                     <label for="uom">UOM</label>
                     <select id="uom" class="form-control custom-select" onchange="calculateTotal()" name="uom">
-                        <?= getUomDropDownOptions($con); ?>
+                        <?= getUomDropDownOptions ($con); ?>
                     </select>
 
                 </div>
@@ -329,7 +337,7 @@ if (isset($_GET['flag']) && isset($_GET['prehid']) && $_GET['flag'] == 'U') {
 
     function getProductSelectBoxForTableRow(prodid) {
         var select = '<select data-prev="' + prodid + '" id="detail_prodid_' + prodid + '" class="form-control custom-select" name="detail_prodid[]" onchange="getProductInfo(this,`D`)">';
-        select += `<?php getProductDropDownOptions($con);?>`
+        select += `<?php getProductDropDownOptions ($con);?>`
         select += '</select>';
         return select;
     }
@@ -348,7 +356,7 @@ if (isset($_GET['flag']) && isset($_GET['prehid']) && $_GET['flag'] == 'U') {
 
     function getUomSelectBoxForTableRow(prodid) {
         var select = '<select data-prev="' + prodid + '" id="detail_uom_' + prodid + '" class="form-control custom-select" name="detail_uom[]" onchange="getProductInfo(this,`D`)">';
-        select += `<?php getUomDropDownOptions($con);;?>`
+        select += `<?php getUomDropDownOptions ($con);;?>`
         select += '</select>';
         return select;
     }
@@ -385,7 +393,7 @@ if (isset($_GET['flag']) && isset($_GET['prehid']) && $_GET['flag'] == 'U') {
     }
 
     function calculateStockUomWise(qty, uom) {
-        var uoms_array = '<?php getAllUoms($con) ?>';
+        var uoms_array = '<?php getAllUoms ($con) ?>';
         uoms_array = JSON.parse(uoms_array);
         for (var key in uoms_array) {
             if (key == uom) {

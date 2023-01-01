@@ -1,4 +1,4 @@
 <?php
-$con = mysqli_connect('localhost', 'root', '', 'epiz_30731322_pos');
+$con = mysqli_connect('localhost', 'root', '', 'id18105439_pos');
 
 ?>
