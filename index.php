@@ -2,22 +2,22 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <?php
-require ('connection.php');
-require ('functions.php');
+require('connection.php');
+require('functions.php');
 $branchid = 1;
 $flag = $prodid = $prehid = $employeeid = $stockinhand_head = $finishedqty = $uom_head = $remarks = '';
-$predate = date ('Y-m-d');
+$predate = date('Y-m-d');
 if (isset($_GET['prehid'])) {
     $flag = 'U';
     $prehid = $_GET['prehid'];
-    $preproduction_head_info = getPreproductionHeadItem ($con, $prehid);
+    $preproduction_head_info = getPreproductionHeadItem($con, $prehid);
     $employeeid = $preproduction_head_info['employeeid'];
     $finishedqty = $preproduction_head_info['finishedqty'];
     $uom_head = $preproduction_head_info['uom'];
     $stockinhand_head = $preproduction_head_info['stockinhand'];
     $prodid = $preproduction_head_info['prodid'];
     $remarks = $preproduction_head_info['remarks'];
-    $response_array = getPreproductionDetailAgainstId ($con, 1);
+    $response_array = getPreproductionDetailAgainstId($con, 1);
     ?>
     <script>
         $(document).ready(function () {
@@ -56,7 +56,8 @@ if (isset($_GET['prehid'])) {
 <div class="container mt-2 mb-1" style="border: 1px solid green" id="page-container">
     <div class="row">
         <div class="col-md-12">
-            <a href="manage-preproduction.php" style="font-size: 18px;font-weight: bold" class="btn btn-primary"> Manage Preproduction</a>
+            <a href="manage-preproduction.php" style="font-size: 18px;font-weight: bold" class="btn btn-primary"> Manage
+                Preproduction</a>
         </div>
     </div>
     <form method="post" action="save.php">
@@ -69,11 +70,11 @@ if (isset($_GET['prehid'])) {
                         id="finished_prodname" <?php if ($flag == 'U') echo "readonly"; ?>
                         onchange="getProductInfo(this)">
                     <option value="">Choose</option>
-                    <?php $product = mysqli_query ($con, "SELECT * FROM `tblproduct` p join tblproductcategory c on c.prodtype=p.prodtype where p.branchid='$branchid' and c.production='Y' ORDER BY `prodid` DESC");
-                    while ($row = mysqli_fetch_assoc ($product)) { ?>
+                    <?php $product = mysqli_query($con, "SELECT * FROM `tblproduct` p join tblproductcategory c on c.prodtype=p.prodtype where p.branchid='$branchid' and c.production='Y' ORDER BY `prodid` DESC");
+                    while ($row = mysqli_fetch_assoc($product)) { ?>
                         <option value="<?php echo $row['prodid']; ?>" <?php if ($row['prodid'] == $prodid) {
                             echo "selected=selected";
-                        } ?>><?php echo htmlentities ($row['prodname'], ENT_COMPAT, 'UTF-8'); ?></option>
+                        } ?>><?php echo htmlentities($row['prodname'], ENT_COMPAT, 'UTF-8'); ?></option>
                     <?php } ?>
 
                 </select>
@@ -96,11 +97,11 @@ if (isset($_GET['prehid'])) {
                 <select class="form-control select2" name="employeeid" required
                         data-select2-id="employee" id="employeeid">
                     <option value="">Choose</option>
-                    <?php $employee = mysqli_query ($con, "SELECT * FROM `tblemployee` where company_id ='$branchid'");
-                    while ($row = mysqli_fetch_assoc ($employee)) { ?>
+                    <?php $employee = mysqli_query($con, "SELECT * FROM `tblemployee` where company_id ='$branchid'");
+                    while ($row = mysqli_fetch_assoc($employee)) { ?>
                         <option value="<?php echo $row['eid']; ?>" <?php if ($row['eid'] == $employeeid) {
                             echo "selected=selected";
-                        } ?>><?php echo htmlentities ($row['fname'] . " " . $row['lname'], ENT_COMPAT, 'UTF-8'); ?></option>
+                        } ?>><?php echo htmlentities($row['fname'] . " " . $row['lname'], ENT_COMPAT, 'UTF-8'); ?></option>
                     <?php } ?>
                 </select>
                 <div class="invalid-feedback">Please provide a valid Employee name.</div>
@@ -130,8 +131,8 @@ if (isset($_GET['prehid'])) {
                         name="uom_head">
                     <option value="">Select UOM</option>
                     <?php
-                    $q = mysqli_query ($con, "select * from tbluom");
-                    while ($row = mysqli_fetch_assoc ($q)) { ?>
+                    $q = mysqli_query($con, "select * from tbluom");
+                    while ($row = mysqli_fetch_assoc($q)) { ?>
                         <option value="<?php echo $row['longname'] ?>" <?php if ($uom_head == $row['longname']) echo "selected=selected"; ?>>
                             <?php echo $row['longname']; ?>
                         </option>
@@ -163,7 +164,7 @@ if (isset($_GET['prehid'])) {
                     <label for="prodname">Product Name</label>
                     <select id="prodname" class="form-control custom-select" name="prodname"
                             onchange="getProductInfo(this,'DH')">
-                        <?= getProductDropDownOptions ($con); ?>
+                        <?= getProductDropDownOptions($con); ?>
                     </select>
                 </div>
 
@@ -185,7 +186,7 @@ if (isset($_GET['prehid'])) {
                 <div class="col-md-2">
                     <label for="uom">UOM</label>
                     <select id="uom" class="form-control custom-select" onchange="calculateTotal()" name="uom">
-                        <?= getUomDropDownOptions ($con); ?>
+                        <?= getUomDropDownOptions($con); ?>
                     </select>
 
                 </div>
@@ -220,7 +221,7 @@ if (isset($_GET['prehid'])) {
         </div>
         <div class="row mt-2 mb-2">
             <div class="col-md-12">
-                <input type="submit" name="submit" value="Submit" class="btn btn-success">
+                <input type="submit" name="submit" id="submit" value="Submit" class="btn btn-success">
             </div>
         </div>
     </form>
@@ -286,6 +287,7 @@ if (isset($_GET['prehid'])) {
         if (+qty > +stock_in_hand) {
             alert('Quantity cannot be greater than the stock');
             $('#add').attr('disabled', true)
+            $('#submit').attr('disabled', true)
             if (quantity_element != "") {
                 var previous_id = $(quantity_element).attr("data-prev-qty")
                 $('#detail_qty_' + previous_id).css('background-color', 'red');
@@ -296,6 +298,7 @@ if (isset($_GET['prehid'])) {
         } else {
             var total = +qty * +price;
             $('#add').attr('disabled', false)
+            $('#submit').attr('disabled', false)
             if (quantity_element != "") {
                 var previous_id = $(quantity_element).attr("data-prev-qty")
                 $('#detail_qty_' + previous_id).css('background-color', 'white');
@@ -340,7 +343,7 @@ if (isset($_GET['prehid'])) {
 
     function getProductSelectBoxForTableRow(prodid) {
         var select = '<select data-prev="' + prodid + '" id="detail_prodid_' + prodid + '" class="form-control custom-select" name="detail_prodid[]" onchange="getProductInfo(this,`D`)">';
-        select += `<?php getProductDropDownOptions ($con);?>`
+        select += `<?php getProductDropDownOptions($con);?>`
         select += '</select>';
         return select;
     }
@@ -359,7 +362,7 @@ if (isset($_GET['prehid'])) {
 
     function getUomSelectBoxForTableRow(prodid) {
         var select = '<select data-prev="' + prodid + '" id="detail_uom_' + prodid + '" class="form-control custom-select" name="detail_uom[]" onchange="getProductInfo(this,`D`)">';
-        select += `<?php getUomDropDownOptions ($con);;?>`
+        select += `<?php getUomDropDownOptions($con);;?>`
         select += '</select>';
         return select;
     }
@@ -396,7 +399,7 @@ if (isset($_GET['prehid'])) {
     }
 
     function calculateStockUomWise(qty, uom) {
-        var uoms_array = '<?php getAllUoms ($con) ?>';
+        var uoms_array = '<?php getAllUoms($con) ?>';
         uoms_array = JSON.parse(uoms_array);
         for (var key in uoms_array) {
             if (key == uom) {
