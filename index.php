@@ -9,7 +9,7 @@ $flag = $prodid = $prehid = $employeeid = $stockinhand_head = $finishedqty = $uo
 $predate = date('Y-m-d');
 if (isset($_GET['prehid'])) {
     $flag = 'U';
-    $prehid = $_GET['prehid'];
+    $prehid = ($_GET['prehid']);
     $preproduction_head_info = getPreproductionHeadItem($con, $prehid);
     $employeeid = $preproduction_head_info['employeeid'];
     $finishedqty = $preproduction_head_info['finishedqty'];
@@ -17,13 +17,13 @@ if (isset($_GET['prehid'])) {
     $stockinhand_head = $preproduction_head_info['stockinhand'];
     $prodid = $preproduction_head_info['prodid'];
     $remarks = $preproduction_head_info['remarks'];
-    $response_array = getPreproductionDetailAgainstId($con, 1);
+    $response_array = getPreproductionDetailAgainstId($con, $prehid);
     ?>
     <script>
         $(document).ready(function () {
             var response_array = '<?= $response_array ?>';
             response_array = JSON.parse(response_array);
-
+            console.log(response_array)
             var prodid_array = response_array['detail_prodid'];
             var price_array = response_array['detail_price'];
             var stockinhand_array = response_array['detail_stockinhand'];
@@ -42,6 +42,7 @@ if (isset($_GET['prehid'])) {
                 $('#price').val(price);
                 $('#stock_in_hand').val(stockinhand);
                 $('#qty').val(qty);
+                qty=calculateStockUomWise(qty,uom);
                 $('#amount').val(qty * price);
 
                 document.getElementById('add').click();
@@ -353,7 +354,7 @@ if (isset($_GET['prehid'])) {
     }
 
     function getStockInHandForTableRow(prodid) {
-        return '<input step="any" type="number" id="detail_stockinhand_' + prodid + '" name="detail_stockinhand[]" class="form-control">';
+        return '<input step="any" readonly type="number" id="detail_stockinhand_' + prodid + '" name="detail_stockinhand[]" class="form-control">';
     }
 
     function getQtyForTableRow(prodid) {
@@ -361,7 +362,8 @@ if (isset($_GET['prehid'])) {
     }
 
     function getUomSelectBoxForTableRow(prodid) {
-        var select = '<select data-prev="' + prodid + '" id="detail_uom_' + prodid + '" class="form-control custom-select" name="detail_uom[]" onchange="getProductInfo(this,`D`)">';
+        var qty='#detail_qty_'+prodid;
+        var select = '<select data-prev="' + prodid + '" id="detail_uom_' + prodid + '" class="form-control custom-select" name="detail_uom[]" onchange="calculateTotal(`'+qty+'`)">';
         select += `<?php getUomDropDownOptions($con);;?>`
         select += '</select>';
         return select;
